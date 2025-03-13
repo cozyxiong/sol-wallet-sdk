@@ -15,3 +15,12 @@ export function createSolAddress(seedHex: string, addressIndex: string) {
     };
     return JSON.stringify(result, null, 2); 
 }
+
+export function importSolWallet(secretKey: string) {
+    const keypair = Keypair.fromSecretKey(Buffer.from(secretKey, 'hex'));
+    const result = { 
+        secretKey: Buffer.from(keypair.secretKey).toString('hex'),
+        address: keypair.publicKey.toBase58()
+    };
+    return JSON.stringify(result, null, 2);
+}
