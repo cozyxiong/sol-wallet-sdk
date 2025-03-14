@@ -1,4 +1,4 @@
-import { createSolAddress, importSolWallet } from "../wallet";
+import { createSolAddress, importSolWallet, verifySolAddress } from "../wallet";
 import * as bip39 from "bip39";
 
 describe("sol wallet test", () => {
@@ -13,5 +13,11 @@ describe("sol wallet test", () => {
         const secretKey = "";
         const addressInfo = importSolWallet(secretKey);
         console.log(addressInfo);
+    })
+
+    test("verify sol address", () => {
+        const address = "8C6xzZPT3UKxgf7dUBvnbbLwF5u64hM3gqDKDz4KXTV8";
+        const isAddress = verifySolAddress(address);
+        console.log(isAddress);
     })
 })

@@ -24,3 +24,7 @@ export function importSolWallet(secretKey: string) {
     };
     return JSON.stringify(result, null, 2);
 }
+
+export function verifySolAddress(address: string) {
+    return /^[1-9A-HJ-NP-Za-km-z]{44}$/.test(address);
+}
