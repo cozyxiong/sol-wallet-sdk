@@ -1,4 +1,4 @@
-import { createSolAddress, importSolWallet, verifySolAddress, signSolTransaction, createNonceAccount } from "../wallet";
+import { createSolAddress, importSolWallet, verifySolAddress, signSolTransaction, createNonceAccount, createStakingAccount } from "../wallet";
 import * as bip39 from "bip39";
 
 describe("sol wallet test", () => {
@@ -59,5 +59,16 @@ describe("sol wallet test", () => {
             minBalanceForRentExemption: 1238880,
         })
         console.log("tx_msg===", tx_msg)
+    });
+
+    test('create stakeAccount', async () => {
+        const tx_msg = await createStakingAccount({
+            authorSecretKey: "55a70321542da0b6123f37180e61993d5769f0a5d727f9c817151c1270c290963a7b3874ba467be6b81ea361e3d7453af8b81c88aedd24b5031fdda0bc71ad32",
+            stakeSecretKey: "ae7aebb8767bb0117f2034c6f13a971a8327676092b30d87cd069620deaa133a0eb55ff73c71d436f86e2388ff8ebc55e77a1a5ffa6e4a5c56cdb3517f25c0e0",
+            lamportsForStakeAccount: 19947680,
+            recentBlockhash: "EusW5Ltz8HsaG4nqaWA7aMo6cq5hJpf7z9eGcTeYifQS",
+            voteAccountAddress: "7PmWxxiTneGteGxEYvzj5pGDVMQ4nuN9DfUypEXmaA8o"
+        })
+        console.log("txSignHex==", tx_msg);
     });
 })

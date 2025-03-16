@@ -1,5 +1,5 @@
 import { HDKey } from "micro-ed25519-hdkey";
-import { Keypair, Transaction, PublicKey, SystemProgram, StakeProgram } from "@solana/web3.js";
+import { Keypair, Transaction, PublicKey, SystemProgram, StakeProgram, NONCE_ACCOUNT_LENGTH, Authorized, Lockup } from "@solana/web3.js";
 import * as SPLToken from '@solana/spl-token';
 
 export function createSolAddress(seedHex: string, addressIndex: string) {
@@ -150,6 +150,45 @@ export function createNonceAccount(params: any) {
     // 签名
     tx.recentBlockhash = recentBlockhash;
     tx.sign(authorAccount, nonceAccount); // 必须由创建者和新账户签名
+    const serializedTx = tx.serialize().toString("base64");
+    return serializedTx;
+}
+
+export function createStakingAccount(params: any) {
+    const { authorSecretKey, stakeSecretKey, recentBlockhash, lamportsForStakeAccount, voteAccountAddress } = params;
+    const authorAccount = Keypair.fromSecretKey(Buffer.from(authorSecretKey, 'hex'));
+    const stakeAccount = Keypair.fromSecretKey(Buffer.from(stakeSecretKey, 'hex'));
+    const votePubkey = new PublicKey(voteAccountAddress);
+    
+    const tx = new Transaction();
+    tx.add(
+        // 创建账户
+        SystemProgram.createAccount({
+            fromPubkey: authorAccount.publicKey, // 支付租金的授权账户地址
+            newAccountPubkey: stakeAccount.publicKey, // 新创建的账户地址
+            lamports: lamportsForStakeAccount, // 租金金额 + 质押金额
+            space: NONCE_ACCOUNT_LENGTH, // 账户空间大小（用于存储 Nonce 数据）
+            programId: SystemProgram.programId // 账户所属程序（系统程序）
+        }),
+        // 初始化质押账户（已激活 active）
+        StakeProgram.initialize({
+            stakePubkey: stakeAccount.publicKey, // 质押账户地址（将新账户初始化为质押账户）
+            authorized: new Authorized(
+                authorAccount.publicKey, // staker 授权账户地址（只有该地址可质押）
+                authorAccount.publicKey // withdrawer 授权账户地址（只有该地址可取回质押）
+            ),
+            lockup: new Lockup(0, 0, PublicKey.default), // 无锁定
+        }),
+        // 委托质押（可选）（已委托 delegated)
+        StakeProgram.delegate({
+            stakePubkey: stakeAccount.publicKey,
+            authorizedPubkey: authorAccount.publicKey,
+            votePubkey: votePubkey
+        })
+    )
+    // 签名
+    tx.recentBlockhash = recentBlockhash;
+    tx.sign(authorAccount, stakeAccount); // 必须由创建者和新账户签名
     const serializedTx = tx.serialize().toString("base64");
     return serializedTx;
 }
