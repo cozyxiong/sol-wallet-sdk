@@ -192,3 +192,23 @@ export function createStakingAccount(params: any) {
     const serializedTx = tx.serialize().toString("base64");
     return serializedTx;
 }
+
+export function deactivateStake(params: any) {
+    const { authorSecretKey, stakeSecretKey, recentBlockhash } = params;
+    const authorAccount = Keypair.fromSecretKey(Buffer.from(authorSecretKey, 'hex'));
+    const stakeAccount = Keypair.fromSecretKey(Buffer.from(stakeSecretKey, 'hex'));
+    
+    const tx = new Transaction();
+    tx.add(
+        // 解质押（ACTIVE → DEACTIVATING）
+        StakeProgram.deactivate({
+            stakePubkey: stakeAccount.publicKey, // 质押账户地址
+            authorizedPubkey: authorAccount.publicKey // 授权账户地址
+        })
+    )
+    // 签名
+    tx.recentBlockhash = recentBlockhash;
+    tx.sign(authorAccount, stakeAccount); // 必须由创建者和新账户签名
+    const serializedTx = tx.serialize().toString("base64");
+    return serializedTx;
+}
