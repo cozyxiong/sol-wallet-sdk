@@ -212,3 +212,25 @@ export function deactivateStake(params: any) {
     const serializedTx = tx.serialize().toString("base64");
     return serializedTx;
 }
+
+export function withdrawFunds(params: any) {
+    const { authorSecretKey, stakeSecretKey, recentBlockhash, stakeBalance } = params;
+    const authorAccount = Keypair.fromSecretKey(Buffer.from(authorSecretKey, 'hex'));
+    const stakeAccount = Keypair.fromSecretKey(Buffer.from(stakeSecretKey, 'hex'));
+    
+    const tx = new Transaction();
+    tx.add(
+        // 提取资金（INACTIVE → 账户关闭）
+        StakeProgram.withdraw({
+            stakePubkey: stakeAccount.publicKey, // 质押账户地址
+            authorizedPubkey: authorAccount.publicKey, // 授权账户地址
+            toPubkey: authorAccount.publicKey, // 提取资金账户地址
+            lamports: stakeBalance // 提取金额（必须提取账户全部余额，Solana 不支持部分解质押）
+        })
+    )
+    // 签名
+    tx.recentBlockhash = recentBlockhash;
+    tx.sign(authorAccount, stakeAccount); // 必须由授权账户和质押账户账户签名
+    const serializedTx = tx.serialize().toString("base64");
+    return serializedTx;
+}

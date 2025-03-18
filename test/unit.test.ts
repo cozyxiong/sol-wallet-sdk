@@ -1,4 +1,4 @@
-import { createSolAddress, importSolWallet, verifySolAddress, signSolTransaction, createNonceAccount, createStakingAccount, deactivateStake } from "../wallet";
+import { createSolAddress, importSolWallet, verifySolAddress, signSolTransaction, createNonceAccount, createStakingAccount, deactivateStake, withdrawFunds } from "../wallet";
 import * as bip39 from "bip39";
 
 describe("sol wallet test", () => {
@@ -80,5 +80,15 @@ describe("sol wallet test", () => {
         })
         console.log("txSignHex==", tx_msg);
 
+    });
+
+    test('withdraw funds', async () => {
+        const tx_msg = await withdrawFunds({
+            authorSecretKey: "",
+            stakeSecretKey: "",
+            recentBlockhash: "5Sqn7oLnVRkkdFV2Dy1hiR1HnUJusuvBQ8NFP4yXJH8j",
+            stakeBalance: 1010592,
+        })
+        console.log("txSignHex==", tx_msg);
     });
 })
